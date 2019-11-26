@@ -121,22 +121,24 @@ def main():
     # generate trees
     bst_tree = gen_bst(random_elems)
     dmt_tree = gen_dmt(random_elems, sum_list, key_access_dist)
-    srt_tree = gen_srt(random_elems)
-    splay_tree = gen_splay_tree(random_elems)
+    srt_tree = gen_bst(random_elems)
+    splay_tree = gen_bst(random_elems)
+    # bst_tree.display()
+    # splay_tree.display()
+    # srt_tree.display()
+    # dmt_tree.display()
+
+
 
     '''test each tree with <num_accesses> searches for random keys'''
     random.seed(5)
     bst_access_freq = test_bst(random_elems, sum_list, bst_tree)
-    bst_tree.display()
     random.seed(5)
     splay_access_freq, splay_tree = test_splay_tree(random_elems, sum_list, splay_tree)
-    splay_tree.display()
     random.seed(5)
     srt_access_freq, srt_tree = test_srt(random_elems, sum_list, srt_tree)
     random.seed(5)
-    srt_tree.display()
     dmt_access_freq, dmt_tree = test_dmt(random_elems, sum_list, dmt_tree)
-    dmt_tree.display()
 
     # print(bst_access_freq)
     # print(splay_access_freq)
