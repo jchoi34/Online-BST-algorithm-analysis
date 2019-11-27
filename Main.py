@@ -1,5 +1,6 @@
 from Optimal_BST import *
 from Key_Distribution_Generator import *
+from math import inf
 import Splay_Tree as st
 import Singe_Rotation_Tree as srt
 import Dynamic_Monotone_Tree as dmt
@@ -125,43 +126,75 @@ def cost_static_bst(tree, frequencies):
 
 def main():
     # sys.setrecursionlimit(1500)  # Change this to print trees with very long paths using <tree>.display()
-
+    num_tests = 10
     '''test each tree with <num_accesses> searches for random keys'''
+
     # splay tree tests
     random.seed(5)
-    for _ in range(10):
+    average_online_cost = 0
+    min_static_cost = inf
+    for _ in range(num_tests):
         random_elems = gen_random_list(num_elems)
         splay_tree = gen_bst(random_elems)
+        # splay_tree = st.generate_splay_tree(random_elems)
         sum_list = gen_sum_list(gen_random_list(num_elems, elem_range))
         tree_access_freq, splay_tree, cost = test_splay_tree(random_elems, sum_list, splay_tree)
         e, w, r = optimal_bst_tables(tree_access_freq)
         tree = generate_optimal_bst(r, num_elems)
-        print('Splay tree')
-        print('Online cost:', cost)
-        print('Static cost:', cost_static_bst(tree, tree_access_freq))
+        static_cost = cost_static_bst(tree, tree_access_freq)
+        average_online_cost += cost
+        if static_cost < min_static_cost:
+            min_static_cost = static_cost
+        # print('Splay tree')
+        # print('Online cost:', cost)
+        # print('Static cost:', static_cost)
+    print('Splay tree averages')
+    print('Average online cost:', average_online_cost / num_tests)
+    print('Minimum static cost:', min_static_cost)
+
     # single rotate tree tests
-    random.seed(5)
-    for _ in range(10):
+    average_online_cost = 0
+    min_static_cost = inf
+    for _ in range(num_tests):
         random_elems = gen_random_list(num_elems)
         srt_tree = gen_bst(random_elems)
+        # srt_tree = srt.generate_srt(random_elems)
+        sum_list = gen_sum_list(gen_random_list(num_elems, elem_range))
         tree_access_freq, srt_tree, cost = test_srt(random_elems, sum_list, srt_tree)
         e, w, r = optimal_bst_tables(tree_access_freq)
         tree = generate_optimal_bst(r, num_elems)
-        print('Single-rotate tree')
-        print('Online cost:', cost)
-        print('Static cost:', cost_static_bst(tree, tree_access_freq))
+        static_cost = cost_static_bst(tree, tree_access_freq)
+        average_online_cost += cost
+        if static_cost < min_static_cost:
+            min_static_cost = static_cost
+        # print('Single-rotate tree')
+        # print('Online cost:', cost)
+        # print('Static cost:', static_cost)
+    print('Single-rotate tree averages')
+    print('Average online cost:', average_online_cost / num_tests)
+    print('Minimum static cost:', min_static_cost)
+
     # dynamic monotone tree tests
-    random.seed(5)
-    for _ in range(10):
+    average_online_cost = 0
+    min_static_cost = inf
+    for _ in range(num_tests):
         random_elems = gen_random_list(num_elems)
+        sum_list = gen_sum_list(gen_random_list(num_elems, elem_range))
         key_access_dist = gen_sorted_freq_list(random_elems, num_elems, elem_range, num_accesses, sum_list)
         dmt_tree = gen_dmt(random_elems, sum_list, key_access_dist)
         tree_access_freq, dmt_tree, cost = test_dmt(random_elems, sum_list, dmt_tree)
         e, w, r = optimal_bst_tables(tree_access_freq)
         tree = generate_optimal_bst(r, num_elems)
-        print('Dynamic monotone tree')
-        print('Online cost:', cost)
-        print('Static cost:', cost_static_bst(tree, tree_access_freq))
+        static_cost = cost_static_bst(tree, tree_access_freq)
+        average_online_cost += cost
+        if static_cost < min_static_cost:
+            min_static_cost = static_cost
+        # print('Dynamic monotone tree')
+        # print('Online cost:', cost)
+        # print('Static cost:', static_cost)
+    print('Dynamic monotone tree averages')
+    print('Average online cost:', average_online_cost / num_tests)
+    print('Minimum static cost:', min_static_cost)
 
 num_elems = 1000
 num_accesses = 10000
