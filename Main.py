@@ -24,8 +24,7 @@ import numpy as np
 
 # Compute optimal BST
 def optimal_bst_tables(key_access_dist):
-    n = len(key_access_dist)
-    return Optimal_BST([0] + [freq for _, freq in key_access_dist], [0] * (n + 1), n) # parameters: p, q, n
+    return Optimal_BST(key_access_dist, num_elems) # parameters: p, n
 
 
 '''Tree generation functions'''
@@ -58,52 +57,74 @@ with an overwritten method for search.
 def test_bst(elems, sum_list, bst_tree):
     access_frequencies = dict.fromkeys(elems, 1)
     max_val = sum_list[len(elems) - 1]
+    cost = 0
     for i in range(num_accesses):
         rand_val = random.randrange(1, max_val + 1)
         index = binary_search_sum_list(sum_list, 0, num_elems, rand_val)
-        bst_tree, _ = bst.search(bst_tree, elems[index])
+        bst_tree, _, search_cost = bst.search(bst_tree, elems[index])
         access_frequencies[elems[index]] += 1
+        cost += search_cost
 
-    return access_frequencies
+    return [0] + [freq for _, freq in convert_freq_dict_to_sorted_freq_list(access_frequencies)], cost
 
 
 # testing for splay tree
 def test_splay_tree(elems, sum_list, splay_tree):
     access_frequencies = dict.fromkeys(elems, 1)
     max_val = sum_list[len(elems) - 1]
+    cost = 0
     for i in range(num_accesses):
         rand_val = random.randrange(1, max_val + 1)
         index = binary_search_sum_list(sum_list, 0, num_elems, rand_val)
-        splay_tree = st.splay_search(splay_tree, elems[index])
+        splay_tree, search_cost = st.splay_search(splay_tree, elems[index])
         access_frequencies[elems[index]] += 1
+        cost += search_cost
 
-    return access_frequencies, splay_tree
+    return [0] + [freq for _, freq in convert_freq_dict_to_sorted_freq_list(access_frequencies)], splay_tree, cost
 
 
 # testing for tree using single-rotate heuristic
 def test_srt(elems, sum_list, srt_tree):
     access_frequencies = dict.fromkeys(elems, 1)
     max_val = sum_list[len(elems) - 1]
+    cost = 0
     for i in range(num_accesses):
         rand_val = random.randrange(1, max_val + 1)
         index = binary_search_sum_list(sum_list, 0, num_elems, rand_val)
-        srt_tree = srt.srt_search(srt_tree, elems[index])
+        srt_tree, search_cost = srt.srt_search(srt_tree, elems[index])
         access_frequencies[elems[index]] += 1
+        cost += search_cost
 
-    return access_frequencies, srt_tree
+    return [0] + [freq for _, freq in convert_freq_dict_to_sorted_freq_list(access_frequencies)], srt_tree, cost
 
 
 # testing for Dynamic monotone tree
 def test_dmt(elems, sum_list, dmt_tree):
     access_frequencies = dict.fromkeys(elems, 1)
     max_val = sum_list[len(elems) - 1]
+    cost = 0
     for i in range(num_accesses):
         rand_val = random.randrange(1, max_val + 1)
         index = binary_search_sum_list(sum_list, 0, num_elems, rand_val)
-        dmt_tree = dmt.dmt_search(dmt_tree, elems[index])
+        dmt_tree, search_cost = dmt.dmt_search(dmt_tree, elems[index])
         access_frequencies[elems[index]] += 1
+        cost += search_cost
 
-    return access_frequencies, dmt_tree
+    return [0] + [freq for _, freq in convert_freq_dict_to_sorted_freq_list(access_frequencies)], dmt_tree, cost
+
+
+# cost of static bst
+def cost_static_bst(tree, frequencies):
+    if tree is none or frequencies is none:
+        return -1
+
+    cost = 0
+    key = 1
+    for freq in frequencies:
+        depth = bst.depth(tree, key)
+        cost += (1 + depth) * freq
+
+    return cost
 
 
 def main():
@@ -119,34 +140,24 @@ def main():
     key_access_dist = gen_sorted_freq_list(random_elems, num_elems, elem_range, num_accesses, sum_list)
 
     # generate trees
-    bst_tree = gen_bst(random_elems)
     dmt_tree = gen_dmt(random_elems, sum_list, key_access_dist)
     srt_tree = gen_bst(random_elems)
     splay_tree = gen_bst(random_elems)
-    # bst_tree.display()
-    # splay_tree.display()
-    # srt_tree.display()
-    # dmt_tree.display()
-
-
 
     '''test each tree with <num_accesses> searches for random keys'''
     random.seed(5)
-    bst_access_freq = test_bst(random_elems, sum_list, bst_tree)
+    splay_access_freq, splay_tree, cost = test_splay_tree(random_elems, sum_list, splay_tree)
+    print(cost)
     random.seed(5)
-    splay_access_freq, splay_tree = test_splay_tree(random_elems, sum_list, splay_tree)
+    srt_access_freq, srt_tree, cost = test_srt(random_elems, sum_list, srt_tree)
+    print(cost)
     random.seed(5)
-    srt_access_freq, srt_tree = test_srt(random_elems, sum_list, srt_tree)
-    random.seed(5)
-    dmt_access_freq, dmt_tree = test_dmt(random_elems, sum_list, dmt_tree)
+    dmt_access_freq, dmt_tree, cost  = test_dmt(random_elems, sum_list, dmt_tree)
+    print(cost)
 
-    # print(bst_access_freq)
-    # print(splay_access_freq)
-    # print(srt_access_freq)
-    # print(dmt_access_freq)
-
-
-    e, w, r = optimal_bst_tables(key_access_dist)
+    e, w, r = optimal_bst_tables(splay_access_freq)
+    tree = generate_optimal_bst(r, num_elems)
+    print(splay_access_freq)
 
 num_elems = 1000
 num_accesses = 10000

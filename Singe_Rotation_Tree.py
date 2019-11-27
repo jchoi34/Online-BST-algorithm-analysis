@@ -13,14 +13,16 @@ def single_rotate(root, node):
 
 # search in SR tree
 def srt_search(root, val):
-    node, node_parent = search(root, val)
+    node, node_parent, cost = search(root, val)
     if node:
         if node is not root:
             root = single_rotate(root, node)
+            cost += 1
     elif node_parent is not root:
         root = single_rotate(root, node_parent)
+        cost += 1
 
-    return root
+    return root, cost
 
 
 # insert into splay tree

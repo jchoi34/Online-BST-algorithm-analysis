@@ -1,7 +1,7 @@
 from math import inf
 from Binary_Search_Tree import *
 
-def Optimal_BST(p, q, n):
+def Optimal_BST(p, n, q=None):
     '''
     Generate optimal Binary Search Tree. Indexing changed from textbook alg to accommodate lists starting at index 0.
     Uses the improvement found by Donald Knuth to make the algorithm O(n^2).
@@ -12,6 +12,9 @@ def Optimal_BST(p, q, n):
     e = [[0 for _ in range(n + 1)] for _ in range(n + 1)]
     w = [[0 for _ in range(n + 1)] for _ in range(n + 1)]
     root = [[0 for _ in range(n)] for _ in range(n)]
+
+    if q is None:
+        q = [0] * (n + 1)
 
     for i in range(n + 1):
         e[i][i] = q[i]
@@ -35,10 +38,9 @@ def Optimal_BST(p, q, n):
                 t = e[i][i] + e[i + 1][j] + w[i][j]
                 e[i][j] = t
 
-    '''Only used for presenting key nodes starting at index 1'''
-    # for i in range(n):
-    #     for j in range(i, n):
-    #         root[i][j] += 1
+    for i in range(n):
+        for j in range(i, n):
+            root[i][j] += 1
 
     return e, w, root
 
@@ -50,13 +52,21 @@ def generate_optimal_bst(roots, n):
     stack = []
     root_val = roots[0][n - 1]
     tree = Node(root_val)
-    if root_val < n - 1:
-        stack.append(roots[root_val + 1][n - 1])
-    if root_val > 0:
-        stack.append(roots[0][root_val - 1])
+    if root_val < n:
+        stack.append((root_val, n - 1))
+    if root_val > 1:
+        stack.append((0, root_val - 2))
 
-    # for i in keys[1:]:
-        # tree = insert(tree, Node(i))
+    while stack:
+        i, j = stack.pop()
+        root_val = roots[i][j]
+        insert(tree, Node(root_val))
+        if i == j:
+            continue
+        if root_val <= j:
+            stack.append((root_val, j))
+        if root_val - 2 >= i:
+            stack.append((i, root_val - 2))
 
     return tree
 
@@ -85,8 +95,6 @@ def Optimal_BST_Original(p, q, n):
                 t = e[i][r] + e[r + 1][j] + w[i][j]
                 if t < e[i][j]:
                     e[i][j] = t
-                    '''Only used for presenting key nodes starting at index 1'''
-                    # root[i][j - 1] = r + 1
-                    root[i][j - 1] = r
+                    root[i][j - 1] = r + 1
 
     return e, w, root

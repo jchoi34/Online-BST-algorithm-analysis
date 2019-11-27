@@ -81,8 +81,9 @@ class Node:
 # Search a bst
 def search(root, val):
     if (root is None):
-        return None, None
+        return None, None, 0
 
+    cost = 1
     temp_parent = None
     temp = root
     while (temp and temp.val != val):
@@ -91,8 +92,26 @@ def search(root, val):
             temp = temp.left
         else:
             temp = temp.right
+        cost += 1
 
-    return temp, temp_parent  # may return None, None
+    return temp, temp_parent, cost  # may return None, None, cost
+
+
+# calculate the depth of a node
+def depth(root, val):
+    if (root is None):
+        return 0
+
+    depth = 0
+    temp = root
+    while (temp and temp.val != val):
+        if (val < temp.val):
+            temp = temp.left
+        else:
+            temp = temp.right
+        depth += 1
+
+    return depth if temp else 0
 
 
 # Insert into a bst

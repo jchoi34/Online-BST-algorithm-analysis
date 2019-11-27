@@ -77,7 +77,7 @@ def convert_freq_dict_to_sorted_freq_list(key_access_dist):
 
 def gen_sorted_freq_list(elems, num_elems, elem_range, num_accesses, sum_list):
     key_access_dist = gen_key_access_dist(elems, num_elems, elem_range, num_accesses, sum_list)
-    key_access_dist = compute_frequencies(key_access_dist)
+    # key_access_dist = compute_frequencies(key_access_dist)
     key_access_dist = convert_freq_dict_to_sorted_freq_list(key_access_dist)
 
     return key_access_dist

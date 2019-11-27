@@ -9,28 +9,31 @@ class DMT_Node(Node):
 # rotate upwards function for DM trees
 def rotate_up(root, node):
     parent = node.parent
+    cost = 0
     while(node is not root and node.counter > parent.counter):
         if node is parent.left:
             root = rotate_right(root, node.parent)
         else:
             root = rotate_left(root, node.parent)
+        cost += 1
         parent = node.parent
 
-    return root
+    return root, cost
 
 
 # search in DM tree
 def dmt_search(root, val):
-    node, node_parent = search(root, val)
+    node, node_parent, cost = search(root, val)
+    rotate_cost = 0
     if node:
         if node is not root:
             node.counter += 1
-            root = rotate_up(root, node)
+            root, rotate_cost = rotate_up(root, node)
     elif node_parent is not root:
         node_parent.counter  += 1
-        root = rotate_up(root, node_parent)
+        root, rotate_cost = rotate_up(root, node_parent)
 
-    return root
+    return root, cost + rotate_cost
 
 
 # insert into DM tree
