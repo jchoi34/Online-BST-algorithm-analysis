@@ -17,11 +17,6 @@ should not be function calls. It would also probably reduce the number of root v
 throughout the entire program.
 '''
 
-'''REMOVE THIS IMPORT LATER!!!'''
-import numpy as np
-'''REMOVE THIS IMPORT LATER!!!'''
-
-
 # Compute optimal BST
 def optimal_bst_tables(key_access_dist):
     return Optimal_BST(key_access_dist, num_elems) # parameters: p, n
@@ -115,7 +110,7 @@ def test_dmt(elems, sum_list, dmt_tree):
 
 # cost of static bst
 def cost_static_bst(tree, frequencies):
-    if tree is none or frequencies is none:
+    if tree is None or frequencies is None:
         return -1
 
     cost = 0
@@ -123,41 +118,50 @@ def cost_static_bst(tree, frequencies):
     for freq in frequencies:
         depth = bst.depth(tree, key)
         cost += (1 + depth) * freq
+        key += 1
 
     return cost
 
 
 def main():
-    # sys.setrecursionlimit(1500)  # Change this to print trees with very long paths
-    random.seed(5)
-    random_elems = gen_random_list(num_elems)  # <num_elems> random elements from 1 to <num_elems>
-    '''
-    Generate list of <num_elements> random elements from 1 to <elem_range>
-    Then use the list from the first step to create a list where the 
-    element at index i, for 1 <= i <= num_elements, is the sum of the first i elements
-    '''
-    sum_list = gen_sum_list(gen_random_list(num_elems, elem_range))
-    key_access_dist = gen_sorted_freq_list(random_elems, num_elems, elem_range, num_accesses, sum_list)
-
-    # generate trees
-    dmt_tree = gen_dmt(random_elems, sum_list, key_access_dist)
-    srt_tree = gen_bst(random_elems)
-    splay_tree = gen_bst(random_elems)
+    # sys.setrecursionlimit(1500)  # Change this to print trees with very long paths using <tree>.display()
 
     '''test each tree with <num_accesses> searches for random keys'''
+    # splay tree tests
     random.seed(5)
-    splay_access_freq, splay_tree, cost = test_splay_tree(random_elems, sum_list, splay_tree)
-    print(cost)
+    for _ in range(10):
+        random_elems = gen_random_list(num_elems)
+        splay_tree = gen_bst(random_elems)
+        sum_list = gen_sum_list(gen_random_list(num_elems, elem_range))
+        tree_access_freq, splay_tree, cost = test_splay_tree(random_elems, sum_list, splay_tree)
+        e, w, r = optimal_bst_tables(tree_access_freq)
+        tree = generate_optimal_bst(r, num_elems)
+        print('Splay tree')
+        print('Online cost:', cost)
+        print('Static cost:', cost_static_bst(tree, tree_access_freq))
+    # single rotate tree tests
     random.seed(5)
-    srt_access_freq, srt_tree, cost = test_srt(random_elems, sum_list, srt_tree)
-    print(cost)
+    for _ in range(10):
+        random_elems = gen_random_list(num_elems)
+        srt_tree = gen_bst(random_elems)
+        tree_access_freq, srt_tree, cost = test_srt(random_elems, sum_list, srt_tree)
+        e, w, r = optimal_bst_tables(tree_access_freq)
+        tree = generate_optimal_bst(r, num_elems)
+        print('Single-rotate tree')
+        print('Online cost:', cost)
+        print('Static cost:', cost_static_bst(tree, tree_access_freq))
+    # dynamic monotone tree tests
     random.seed(5)
-    dmt_access_freq, dmt_tree, cost  = test_dmt(random_elems, sum_list, dmt_tree)
-    print(cost)
-
-    e, w, r = optimal_bst_tables(splay_access_freq)
-    tree = generate_optimal_bst(r, num_elems)
-    print(splay_access_freq)
+    for _ in range(10):
+        random_elems = gen_random_list(num_elems)
+        key_access_dist = gen_sorted_freq_list(random_elems, num_elems, elem_range, num_accesses, sum_list)
+        dmt_tree = gen_dmt(random_elems, sum_list, key_access_dist)
+        tree_access_freq, dmt_tree, cost = test_dmt(random_elems, sum_list, dmt_tree)
+        e, w, r = optimal_bst_tables(tree_access_freq)
+        tree = generate_optimal_bst(r, num_elems)
+        print('Dynamic monotone tree')
+        print('Online cost:', cost)
+        print('Static cost:', cost_static_bst(tree, tree_access_freq))
 
 num_elems = 1000
 num_accesses = 10000
