@@ -51,7 +51,8 @@ def generate_optimal_bst(roots, n):
         return Node(1)
     stack = []
     root_val = roots[0][n - 1]
-    tree = Node(root_val)
+    tree = BinarySearchTree()
+    tree.insert(Node(root_val))
     if root_val < n:
         stack.append((root_val, n - 1))
     if root_val > 1:
@@ -60,7 +61,7 @@ def generate_optimal_bst(roots, n):
     while stack:
         i, j = stack.pop()
         root_val = roots[i][j]
-        insert(tree, Node(root_val))
+        tree.insert(Node(root_val))
         if i == j:
             continue
         if root_val <= j:

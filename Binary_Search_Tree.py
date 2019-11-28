@@ -1,271 +1,179 @@
-# Tree node
-class Node:
-    def __init__(self, val=-1, parent=None):
-        self.parent = parent
-        self.left = None
-        self.right = None
-        self.val = val
+from Node import *
+
+class BinarySearchTree:
+    def __init__(self, root=None):
+        self.root = root
 
 
-    def __str__(self):
-        return str(self.val)
+    # Search a bst
+    def search(self, val):
+        if (self.root is None):
+            return None, None, 0
+        cost = 1
+        temp_parent = None
+        temp = self.root
+        while (temp and temp.val != val):
+            temp_parent = temp
+            if (val < temp.val):
+                temp = temp.left
+            else:
+                temp = temp.right
+            cost += 1
+
+        return temp, temp_parent, cost  # may return None, None, cost
 
 
-    '''
-    THIS DISPLAY FUNCTION IS NOT MINE!!!!!!!
-    It is from the url below.
+    # calculate the depth of a node
+    def depth(self, val):
+        if (self.root is None):
+            return 0
+        depth = 0
+        temp = self.root
+        while (temp and temp.val != val):
+            if (val < temp.val):
+                temp = temp.left
+            else:
+                temp = temp.right
+            depth += 1
 
-    https://stackoverflow.com/questions/34012886/print-binary-tree-level-by-level-in-python
-    By user: https://stackoverflow.com/users/1143396/j-v
-    '''
-
-    def display(self):
-        lines, _, _, _ = self._display_aux()
-        for line in lines:
-            print(line)
-
-    '''
-    THIS DISPLAY FUNCTION IS NOT MINE!!!!!!!
-    It is from the url below.
-
-    https://stackoverflow.com/questions/34012886/print-binary-tree-level-by-level-in-python
-    By user: https://stackoverflow.com/users/1143396/j-v
-    '''
-
-    def _display_aux(self):
-        """Returns list of strings, width, height, and horizontal coordinate of the root."""
-        # No child.
-        if self.right is None and self.left is None:
-            line = '%s' % self.val
-            width = len(line)
-            height = 1
-            middle = width // 2
-            return [line], width, height, middle
-
-        # Only left child.
-        if self.right is None:
-            lines, n, p, x = self.left._display_aux()
-            s = '%s' % self.val
-            u = len(s)
-            first_line = (x + 1) * ' ' + (n - x - 1) * '_' + s
-            second_line = x * ' ' + '/' + (n - x - 1 + u) * ' '
-            shifted_lines = [line + u * ' ' for line in lines]
-            return [first_line, second_line] + shifted_lines, n + u, p + 2, n + u // 2
-
-        # Only right child.
-        if self.left is None:
-            lines, n, p, x = self.right._display_aux()
-            s = '%s' % self.val
-            u = len(s)
-            first_line = s + x * '_' + (n - x) * ' '
-            second_line = (u + x) * ' ' + '\\' + (n - x - 1) * ' '
-            shifted_lines = [u * ' ' + line for line in lines]
-            return [first_line, second_line] + shifted_lines, n + u, p + 2, u // 2
-
-        # Two children.
-        left, n, p, x = self.left._display_aux()
-        right, m, q, y = self.right._display_aux()
-        s = '%s' % self.val
-        u = len(s)
-        first_line = (x + 1) * ' ' + (n - x - 1) * '_' + s + y * '_' + (m - y) * ' '
-        second_line = x * ' ' + '/' + (n - x - 1 + u + y) * ' ' + '\\' + (m - y - 1) * ' '
-        if p < q:
-            left += [n * ' '] * (q - p)
-        elif q < p:
-            right += [m * ' '] * (p - q)
-        zipped_lines = zip(left, right)
-        lines = [first_line, second_line] + [a + u * ' ' + b for a, b in zipped_lines]
-        return lines, n + m + u, max(p, q) + 2, n + u // 2
+        return depth if temp else 0
 
 
-# Search a bst
-def search(root, val):
-    if (root is None):
-        return None, None, 0
+    # Insert into a bst
+    def insert(self, node):
+        if node is None:
+            return
+        if self.root is None:
+            self.root = node
+            return
+        temp_parent = None
+        temp = self.root
+        while (temp):
+            temp_parent = temp
+            if (node.val <= temp.val):
+                temp = temp.left
+            else:
+                temp = temp.right
 
-    cost = 1
-    temp_parent = None
-    temp = root
-    while (temp and temp.val != val):
-        temp_parent = temp
-        if (val < temp.val):
-            temp = temp.left
+        node.parent = temp_parent
+        if (node.val <= temp_parent.val):
+            temp_parent.left = node
         else:
-            temp = temp.right
-        cost += 1
-
-    return temp, temp_parent, cost  # may return None, None, cost
+            temp_parent.right = node
 
 
-# calculate the depth of a node
-def depth(root, val):
-    if (root is None):
-        return 0
+    # Delete from a bst
+    def delete(self, node):
+        '''
+        Same algorithm from CLRS textbooks.
 
-    depth = 0
-    temp = root
-    while (temp and temp.val != val):
-        if (val < temp.val):
-            temp = temp.left
+        :param root: root of tree
+        :param node: node to delete
+        '''
+
+        if self.root is None or node is None or (self.root is not node and node.parent is None):
+            return
+        if node.left is None:
+            self.transplant(node, node.right)
+        elif node.right is None:
+            self.transplant(node, node.left)
         else:
-            temp = temp.right
-        depth += 1
+            successor = tree_min(node.right)
+            if successor.parent is not node:
+                self.transplant(self.root, successor, successor.right)
+                successor.right.parent = successor
+            self.transplant(self.root, node, successor)
+            successor.left = node.left
+            successor.left.parent = successor
+        del node
 
-    return depth if temp else 0
 
+    def rotate_right(self, node):
+        '''
+        Right rotate function from CLRS textbook.
 
-# Insert into a bst
-def insert(root, node):
-    if (root is None or node is None):
-        return
+        :param root: root of tree
+        :param node: node to rotate
+        '''
 
-    temp_parent = None
-    temp = root
-    while (temp):
-        temp_parent = temp
-        if (node.val <= temp.val):
-            temp = temp.left
+        y = node.left
+        node.left = y.right
+        if y.right:
+            y.right.parent = node
+        y.parent = node.parent
+        if node.parent is None:
+            self.root = y
+        elif node is node.parent.left:
+            node.parent.left = y
         else:
-            temp = temp.right
-
-    node.parent = temp_parent
-    if (node.val <= temp_parent.val):
-        temp_parent.left = node
-    else:
-        temp_parent.right = node
-
-    return root
+            node.parent.right = y
+        y.right = node
+        node.parent = y
 
 
-# Delete from a bst
-def delete(root, node):
-    '''
-    Same algorithm from CLRS textbooks.
+    def rotate_left(self, node):
+        '''
+        Left rotate function from CLRS textbook.
 
-    :param root: root of tree
-    :param node: node to delete
-    '''
+        :param root: root of tree
+        :param node: node to rotate
+        '''
 
-    if root is None or node is None or (root is not node and node.parent is None):
-        return root
-
-    if node.left is None:
-        root = transplant(root, node, node.right)
-    elif node.right is None:
-        root = transplant(root, node, node.left)
-    else:
-        successor = tree_min(node.right)
-        if successor.parent is not node:
-            root = transplant(root, successor, successor.right)
-            successor.right.parent = successor
-        root = transplant(root, node, successor)
-        successor.left = node.left
-        successor.left.parent = successor
-    del node
-
-    return root
+        y = node.right
+        node.right = y.left
+        if y.left:
+            y.left.parent = node
+        y.parent = node.parent
+        if node.parent is None:
+            self.root = y
+        elif node is node.parent.left:
+            node.parent.left = y
+        else:
+            node.parent.right = y
+        y.left = node
+        node.parent = y
 
 
-def rotate_right(root, node):
-    '''
-    Right rotate function from CLRS textbook.
+    def transplant(self, u, v):
+        '''
+        Helper for delete(root, node) to move subtrees.
+        Same algorithm from CLRS textbooks.
 
-    :param root: root of tree
-    :param node: node to rotate
-    '''
+        :param root: root of tree
+        :param u: node to move
+        :param v: node to take u's place
+        '''
 
-    y = node.left
-    node.left = y.right
-    if y.right:
-        y.right.parent = node
-    y.parent = node.parent
-    if node.parent is None:
-        root = y
-    elif node is node.parent.left:
-        node.parent.left = y
-    else:
-        node.parent.right = y
-    y.right = node
-    node.parent = y
-
-    return root
+        if self.root is u:
+            self.root = v
+        elif u is u.parent.left:
+            u.parent.left = v
+        else:
+            u.parent.right = v
+        if v:
+            v.parent = u.parent
 
 
-def rotate_left(root, node):
-    '''
-    Left rotate function from CLRS textbook.
+    # Return smallest element in a tree
+    def tree_min(self, node):
+        while node.left:
+            node = node.left
 
-    :param root: root of tree
-    :param node: node to rotate
-    '''
-
-    y = node.right
-    node.right = y.left
-    if y.left:
-        y.left.parent = node
-    y.parent = node.parent
-    if node.parent is None:
-        root = y
-    elif node is node.parent.left:
-        node.parent.left = y
-    else:
-        node.parent.right = y
-    y.left = node
-    node.parent = y
-
-    return root
+        return node
 
 
-def transplant(root, u, v):
-    '''
-    Helper for delete(root, node) to move subtrees.
-    Same algorithm from CLRS textbooks.
+    # Create a BST with keys
+    def generate_bst(self, keys):
+        self.root = Node(keys[0])
+        for i in keys[1:]:
+            self.insert(Node(i))
 
-    :param root: root of tree
-    :param u: node to move
-    :param v: node to take u's place
-    '''
-
-    if root is u:
-        root = v
-    elif u is u.parent.left:
-        u.parent.left = v
-    else:
-        u.parent.right = v
-    if v:
-        v.parent = u.parent
-
-    return root
+        return self.root
 
 
-# Return smallest element in a tree
-def tree_min(node):
-    while node.left:
-        node = node.left
-
-    return node
-
-
-# Create a BST with keys
-def generate_bst(keys):
-    tree = Node(keys[0])
-    for i in keys[1:]:
-        tree = insert(tree, Node(i))
-
-    return tree
-
-
-# Display elements of a tree in order
-def in_order_traversal(r):
-    if r:
-        in_order_traversal(r.left)
-        print(r.val)
-        in_order_traversal(r.right)
-
-
-def test_optimal_bst(p = [0, 0.15, 0.10, 0.05, 0.10, 0.20], q = [0.05, 0.10, 0.05, 0.05, 0.05, 0.10], n = 5):
-    e, w, root = Optimal_BST(p, q, n)
-
-    print('e\n', np.matrix(e), '\n')
-    print('w\n', np.matrix(w), '\n')
-    print('root\n', np.matrix(root))
+    # Display elements of a tree in order
+    def in_order_traversal(self, node):
+        if node:
+            self.in_order_traversal(node.left)
+            print(node.val)
+            self.in_order_traversal(node.right)
